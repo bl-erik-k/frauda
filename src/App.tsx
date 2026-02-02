@@ -7,7 +7,8 @@ import { Alert } from "./components/Alert/Alert";
 import { getIndustries } from "./services/axios/industries/endpoints";
 import type { Industry } from "./services/axios/industries/types";
 import { calculateLoan } from "./services/axios/calculate/endpoints";
-import type { AlertMessage, AlertProps } from "./components/Alert/types";
+import type { AlertProps } from "./components/Alert/types";
+import { buildSuccessMessages, buildErrorMessages } from "./helper-functions/alertMessageBuilder";
 
 function App() {
   const [monthlyRevenue, setMonthlyRevenue] = useState<number>();
@@ -36,7 +37,6 @@ function App() {
 
   const handleSubmit = useCallback(async () => {
     if (!selectedIndustry || !loanAmount || !repaymentDuration || !monthlyRevenue) return;
-
     setIsLoading(true);
     try {
       const response = await calculateLoan({
@@ -49,19 +49,9 @@ function App() {
       const { loanDetails, approval } = response.data;
       const isApproved = approval.status === "approved";
 
-      const messages: AlertMessage[] = isApproved
-        ? [
-            { label: "Annual Interest Rate", message: `${loanDetails.annualInterestRate} %` },
-            {
-              label: "Total Interest Cost",
-              message: `${loanDetails.totalInterest.toLocaleString()} kr`,
-            },
-            {
-              label: "Total Payment Cost",
-              message: `${loanDetails.totalPayment.toLocaleString()} kr`,
-            },
-          ]
-        : [{ label: "Max Loan Amount", message: `${approval.maxLoanAmount.toLocaleString()} kr` }];
+      const messages = isApproved
+        ? buildSuccessMessages(loanDetails)
+        : buildErrorMessages(approval.maxLoanAmount);
 
       setAlert({
         type: isApproved ? "success" : "error",

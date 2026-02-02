@@ -19,7 +19,7 @@ interface ApprovalInfo {
   revenueCategory: revenueCategory;
 }
 
-interface LoanDetails {
+export interface LoanDetails {
   loanAmount: number;
   loanTermMonths: number;
   annualInterestRate: number;
